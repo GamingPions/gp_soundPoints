@@ -17,6 +17,7 @@ end)
 local hasEnteredMarker = false
 local LastPointName, CurrentAction, CurrentActionMsg
 local HasAlreadyEnteredMarker = false
+local soundTimer = false
 ------------------------------------------------------------------------------------------------------
 
 RegisterNetEvent('esx:setJob')
@@ -25,6 +26,8 @@ AddEventHandler('esx:setJob', function(job2)
     Citizen.Wait(100)
 end)
 
+
+
 AddEventHandler('soundPoints:hasEnteredMarker', function(part, pointName)
 	for k,v in pairs(Config.Points) do
 		if v.name == pointName then
@@ -32,8 +35,38 @@ AddEventHandler('soundPoints:hasEnteredMarker', function(part, pointName)
 			CurrentActionMsg  = v.lable
 		end
 	end
+	for k,v in pairs(Config.Zones) do
+		if v.name == pointName then
+			playZoneSound(pointName)
+		end
+	end
 end)
 
+function playZoneSound(pointName)
+	for k,v in pairs(Config.Zones) do
+		if v.useTimer then
+			if not soundTimer then
+				if v.name == pointName then
+					print("play sound")
+					TriggerServerEvent("soundPoints:Play", v.soundPoint, v.soundFile, v.soundRange, v.SoundVolume, v.name)
+					soundTimer = true
+					timerPlay()
+				end
+			end
+		else
+			if v.name == pointName then
+				print("play sound")
+				TriggerServerEvent("soundPoints:Play", v.soundPoint, v.soundFile, v.soundRange, v.SoundVolume, v.name)
+			end
+		end
+	end
+end
+
+function timerPlay()
+	print(soundTimer)
+	Citizen.Wait(Config.Timer)
+	soundTimer = false
+end
 
 AddEventHandler('soundPoints:hasExitedMarker', function(part)
 	CurrentAction = nil
@@ -78,6 +111,16 @@ Citizen.CreateThread(function()
 							end
 						end	
 					end
+			end
+
+			for k,v in pairs(Config.Zones) do
+				local distance = GetDistanceBetweenCoords(playerCoords.x, playerCoords.y, playerCoords.z, v.soundPoint, true)
+				if distance < 2 then	
+					letSleep = false
+					if distance < Config.MarkerSize.x then
+						isInMarker, currentPlace, currentPointName = true, k, v.name
+					end
+				end
 			end
 
 			if isInMarker and not HasAlreadyEnteredMarker or (isInMarker and (LastPlace ~= currentPlace or LastPointName ~= currentPointName)) then
