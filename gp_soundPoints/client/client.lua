@@ -26,8 +26,6 @@ AddEventHandler('esx:setJob', function(job2)
     Citizen.Wait(100)
 end)
 
-
-
 AddEventHandler('soundPoints:hasEnteredMarker', function(part, pointName)
 	for k,v in pairs(Config.Points) do
 		if v.name == pointName then
@@ -83,22 +81,10 @@ Citizen.CreateThread(function()
 			local currentPlace, currentPointName
 
 			for k,v in pairs(Config.Points) do
-					local distance = GetDistanceBetweenCoords(playerCoords.x, playerCoords.y, playerCoords.z, v.marker.x, v.marker.y, v.marker.z, true)
-					if distance < Config.DrawDistance then
-						if v.job ~= nil then
-							if v.job == ESX.PlayerData.job.name then
-								if Config.EnableText then
-									DrawText3Ds(v.marker.x, v.marker.y, v.marker.z + 0.3 , v.lable)
-								end
-								if Config.EnableMarker then
-									DrawMarker(Config.MarkerType, v.marker.x, v.marker.y, v.marker.z-0.9, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 1.0, 1.0, 1.0, Config.MarkerColor.r, Config.MarkerColor.g, Config.MarkerColor.b, 100, false, true, 2, true, false, false, false)
-								end
-								letSleep = false
-								if distance < Config.MarkerSize.x then
-									isInMarker, currentPlace, currentPointName = true, k, v.name
-								end
-							end
-						elseif v.job == nil then
+				local distance = GetDistanceBetweenCoords(playerCoords.x, playerCoords.y, playerCoords.z, v.marker.x, v.marker.y, v.marker.z, true)
+				if distance < Config.DrawDistance then
+					if v.job then
+						if v.job == ESX.PlayerData.job.name then
 							if Config.EnableText then
 								DrawText3Ds(v.marker.x, v.marker.y, v.marker.z + 0.3 , v.lable)
 							end
@@ -109,8 +95,20 @@ Citizen.CreateThread(function()
 							if distance < Config.MarkerSize.x then
 								isInMarker, currentPlace, currentPointName = true, k, v.name
 							end
-						end	
-					end
+						end
+					else 
+						if Config.EnableText then
+							DrawText3Ds(v.marker.x, v.marker.y, v.marker.z + 0.3 , v.lable)
+						end
+						if Config.EnableMarker then
+							DrawMarker(Config.MarkerType, v.marker.x, v.marker.y, v.marker.z-0.9, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 1.0, 1.0, 1.0, Config.MarkerColor.r, Config.MarkerColor.g, Config.MarkerColor.b, 100, false, true, 2, true, false, false, false)
+						end
+						letSleep = false
+						if distance < Config.MarkerSize.x then
+							isInMarker, currentPlace, currentPointName = true, k, v.name
+						end
+					end	
+				end
 			end
 
 			for k,v in pairs(Config.Zones) do
